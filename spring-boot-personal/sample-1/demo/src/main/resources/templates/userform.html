@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>user form</title>
+</head>
+<body>
+    <h1>signup form!</h1>
+    <h2 th:inline="text">Your current id: [[${user.id}]]</h2>
+    <h2 th:inline="text">[[${user.errorMessage}]]</h2>
+    <h2>finish account creation below :3</h2>
+    <form action="#" th:action="@{/user-entry}" th:object="${user}" method="post">
+        Display Name <input type="text" th:field="*{displayName}"/> <br />
+        User Name <input type="text" th:field="*{userName}"/> <br />
+        Password <input type="text" th:field="*{passcode}"/> <br />
+        Email <input type="text" th:field="*{email}"/> <br />
+        <input type="submit" value="press me"/>
+    </form>
+</body>
+</html>

@@ -4,6 +4,9 @@
     <title>Greeting Page</title>
 </head>
 <body>
-    <h1><span th:text="${name}"></span>!</h1>
+    <h2 th:inline="text">Signed in as: [[${user.displayName}]]</h2>
+    <a href="/user-entry">user entry page</a>
+    <a href="/post-entry">post entry page</a>
+    <a href="/post-list">post list</a>
 </body>
 </html>

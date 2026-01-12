@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Post display</title>
+</head>
+<body>
+    <h1><span th:text="${post.title}"></span></h1>
+    <p><span width="800" th:text="${post.text}"></p>
+    <p><a th:href="@{/email-sent}">click here to receive a confirmation email</a></p>
+    <a th:href="@{/}">click here to go to home</a>
+</body>
+</html>

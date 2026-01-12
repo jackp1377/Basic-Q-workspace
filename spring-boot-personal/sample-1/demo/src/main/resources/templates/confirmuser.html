@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Greeting Page</title>
+</head>
+<body>
+    <h1><span th:text="${user.displayName}"></span>! welcome!</h1>
+    <p><a th:href="@{/email-sent}">click here to receive a confirmation email</a></p>
+</body>
+</html>
