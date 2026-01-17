@@ -1,0 +1,7 @@
+#lang racket
+
+(require slideshow)
+
+(list (circle 10) (circle 100))
+
+(for/hash ((i (in-range 10))) (values i (circle (* (add1 i) 10))))

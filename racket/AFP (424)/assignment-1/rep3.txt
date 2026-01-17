@@ -1,0 +1,7 @@
+((a (b c d e g i)) 
+(b (c a i e d )) 
+(c (a b d i g))
+(d (a b c e g i))
+(e (d a b i g))
+(g (e a d c i))
+(i (e a c d g b)))
