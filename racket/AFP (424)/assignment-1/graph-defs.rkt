@@ -3,9 +3,9 @@
 (require racket/pretty)
 (require racket/trace)
 
-(struct node (name edge-list))
-(struct graph (name node-list))
-(struct edge (node-two))
+(struct node (name edge-list) #:transparent)
+(struct graph (name node-list) #:transparent)
+(struct edge (node-one node-two) #:transparent)
 
 (struct queue (q))
 (define gen-queue (queue '()))
@@ -41,7 +41,7 @@
             (define node-list (for/list ((n names) (neighbor neighbors)) (node n neighbor)))
             (define new-node-list 
                 (for/list ((n names) (neighbor neighbors)) 
-                    (node n (for/list ((e neighbor)) (edge (find-node node-list e))))))
+                    (node n (for/list ((e neighbor)) (edge (find-node node-list n) (find-node node-list e))))))
             (define g (graph 'g new-node-list))
             g)))
 
@@ -49,7 +49,7 @@
     (cond 
         ((empty? node-list) 'node-not-found-here)
         (else 
-            (if (equal? name (node-name (car node-list)))
+            (if (eqv? name (node-name (car node-list)))
                 (car node-list)
                 (find-node (cdr node-list) name)))))
                 
@@ -66,37 +66,53 @@
         (else 
             (node-member node (cdr list)))))
 
+(define (graph->symbol g)
+    (match g
+        ((graph name nodes)
+            `(,(for/list ((n nodes)) (graph->symbol n))))
+        ((node name edges) 
+            `(,name ,(for/list ((e edges)) (graph->symbol e))))
+        ((edge e1 e2)
+            (node-name e2))))
+
+    
+(define (edge-member? edge list)
+    (cond 
+        ((empty? list) #f)
+        (else 
+            (if (equal? (edge-node-two edge) (edge-node-two (car list))) 
+                #t
+                (edge-member? edge (cdr list))))))
 
 (define (spanning-tree g)
     (queue-clearqueue)
     (define node-list (graph-node-list g))
     (define new-g (graph 'g '()))
-    (for ((n node-list)) (queue-enqueue n))
-    (define (span-inner marked-list visited-list)
+    (queue-enqueue (car node-list))
+    (define (spanning-inner visited-list marked-list)
         (cond 
             ((queue-isempty?) new-g)
             (else 
                 (define curr-node (queue-dequeue))
                 (define is-visited? (node-member curr-node visited-list))
-                (cond
+                (cond 
                     ((equal? is-visited? #t) 
-                        (span-inner marked-list visited-list))
+                        (spanning-inner visited-list marked-list))
                     (else 
-                        (define edges (for/list ((e (node-edge-list curr-node))) 
-                            (println (node-name (edge-node-two e)))
-                            (edge-node-two e)))
-                        (for ((e edges)) (queue-enqueue e)) ; these r node structs not edges
+                        (define curr-edges (node-edge-list curr-node))
                         (define new-node (node (node-name curr-node) (list)))
-                        (define new-edge-list (for/list ((e edges)) (edge e)))
+                        (define new-edge-list (for/list ((e curr-edges)) (edge new-node (edge-node-two e))))
                         (for ((e new-edge-list)) 
-                            (when (node-member (edge-node-two e) marked-list)
+                            (when (or (edge-member? e marked-list) (node-member (edge-node-two e) visited-list))
                                 (set! new-edge-list (remove e new-edge-list))))
+                        (for ((e new-edge-list)) (queue-enqueue (find-node node-list (node-name (edge-node-two e)))))
+                        (for ((n visited-list))
+                            (for ((e (node-edge-list n))) 
+                                (when (equal? (node-name new-node) (node-name (edge-node-two e))) (set! new-edge-list (cons (edge new-node (edge-node-one e)) new-edge-list)))))
                         (set! new-node (node (node-name curr-node) new-edge-list))
-                        ; (define new-node (node (node-name curr-node) (for/list ((edge edges)) (edge (find-node  (node-name curr-node)) edge))))
                         (set! new-g (graph 'g (append (graph-node-list new-g) (list new-node))))
-                        (span-inner (append marked-list (for/list ((e (node-edge-list new-node))) (edge-node-two e))) (append visited-list (list new-node))))))))
-    (span-inner '() '()))
-
+                        (spanning-inner (cons new-node visited-list) (append new-edge-list marked-list)))))))
+                        (spanning-inner '() '()))
 
 
 
